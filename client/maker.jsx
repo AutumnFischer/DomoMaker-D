@@ -9,13 +9,14 @@ const handleDomo = (e, onDomoAdded) => {
 
     const name = e.target.querySelector('#domoName').value;
     const age = e.target.querySelector('#domoAge').value;
+    const favoriteColor = e.target.querySelector('#domoFavoriteColor').value;
 
-    if (!name || !age) {
+    if (!name || !age || !favoriteColor) {
         helper.handleError('All fields are required');
         return false;
     }
 
-    helper.sendPost(e.target.action, { name, age }, onDomoAdded);
+    helper.sendPost(e.target.action, { name, age, favoriteColor }, onDomoAdded);
     return false;
 }
 
@@ -32,6 +33,8 @@ const DomoForm = (props) => {
             <input id="domoName" type="text" name="name" placeholder="Domo Name" />
             <label htmlFor="age">Age: </label>
             <input id="domoAge" type="number" min="0" name="age" />
+            <label htmlFor="favoriteColor">Favorite Color: </label>
+            <input id="domoFavoriteColor" type="text" name="favoriteColor" placeholder="Domo Favorite Color" />
             <input className="makeDomoSubmit" type="submit" value="Make Domo" />
         </form>
     );
@@ -59,10 +62,15 @@ const DomoList = (props) => {
 
     const domoNodes = domos.map(domo => {
         return (
-            <div key={domo._id} className="domo">
+            <div
+                key={domo._id}
+                className="domo"
+                onClick={() => props.onSelectDomo(domo)}
+            >
                 <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoFace" />
                 <h3 className="domoName">Name: {domo.name}</h3>
                 <h3 className="domoAge">Age: {domo.age}</h3>
+                <h3 className="domoFavoriteColor">Favorite Color: {domo.favoriteColor}</h3>
             </div>
         );
     });
@@ -74,8 +82,34 @@ const DomoList = (props) => {
     );
 };
 
+const DomoDetail = ({ domo, onBack }) => {
+    return (
+        <div className="domoDetail">
+            <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoDetailFace" />
+            <h2>{domo.name}</h2>
+            <p><strong>Age:</strong> {domo.age}</p>
+            <p><strong>Favorite Color:</strong> {domo.favoriteColor}</p>
+            <button type="button" className="makeDomoSubmit" onClick={onBack}>
+                Back to All Domos
+            </button>
+        </div>
+    );
+};
+
 const App = () => {
     const [reloadDomos, setReloadDomos] = useState(false);
+    const [selectedDomo, setSelectedDomo] = useState(null);
+
+    if (selectedDomo) {
+        return (
+            <div id="domoDetailContainer">
+                <DomoDetail
+                    domo={selectedDomo}
+                    onBack={() => setSelectedDomo(null)}
+                />
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -83,7 +117,11 @@ const App = () => {
                 <DomoForm triggerReload={() => setReloadDomos(!reloadDomos)} />
             </div>
             <div id="domos">
-                <DomoList domos={[]} reloadDomos={reloadDomos} />
+                <DomoList
+                    domos={[]}
+                    reloadDomos={reloadDomos}
+                    onSelectDomo={(domo) => setSelectedDomo(domo)}
+                />
             </div>
         </div>
     );
